@@ -246,72 +246,60 @@ var lightOptions = {
 $(".slides-highlight").slick(lightOptions);
 
 //年度活動
+
+//slick觸發
+var timelineOptions = {
+  autoplay: false,
+  speed: 1000,
+  slidesToShow: 6,
+  slidesToScroll: 1,
+  rows: 0,
+  arrows: false,
+  initialSlide: 2,
+  // centerMode: true,
+  infinite: false,
+  adaptiveHeight: true,
+
+  responsive: [
+    {
+      breakpoint: 1600,
+      settings: {
+        slidesToShow: 4,
+        slidesToScroll: 1,
+      },
+      breakpoint: 992,
+      settings: {
+        slidesToShow: 3,
+        slidesToScroll: 1,
+      },
+      breakpoint: 500,
+      settings: "unslick",
+    },
+  ],
+};
+$(".slides-timeline").slick(timelineOptions);
+
+activeMonth();
+
 // 年度活動月份判斷
-$(function () {
+function activeMonth() {
   var thisMonth;
   var currentMonth = new Date().getMonth() + 1;
-  // thisMonth = null;
-  function activeMonth() {
-    $(".timeline-wrap .slide-box .month").each(function () {
-      var THIS = $(this);
-      var Month = THIS.attr("data-num");
-      if (Month == currentMonth) {
-        THIS.addClass("active");
-        thisMonth = THIS.parent().attr("data-slick-index");
-        return thisMonth;
-      }
-      if (Month < currentMonth) {
-        THIS.parent(".slide-box").addClass("disabled");
-      }
-    });
-  }
+  $(".timeline-wrap .slide-box .month").each(function () {
+    var THIS = $(this);
+    var Month = THIS.attr("data-num");
+    if (Month == currentMonth) {
+      THIS.addClass("active");
+      thisMonth = THIS.parent().attr("data-slick-index");
+      return thisMonth;
+    }
+    if (Month < currentMonth) {
+      THIS.parent(".slide-box").addClass("disabled");
+    }
+  });
+}
 
-  var timelineOptions = {
-    autoplay: false,
-    speed: 1000,
-    slidesToShow: 6,
-    slidesToScroll: 1,
-    rows: 0,
-    arrows: false,
-    initialSlide: 2,
-    // centerMode: true,
-    infinite: false,
-    adaptiveHeight: true,
-
-    responsive: [
-      {
-        breakpoint: 1600,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-        },
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 1,
-        },
-        breakpoint: 500,
-        settings: "unslick",
-      },
-    ],
-  };
-  $(".slides-timeline").slick(timelineOptions);
-
-  // $(".slides-timeline").on("afterChange", function (index, slick, currentSlide) {
-
-  //   // var currentSlide = $(".slides-timeline").slick("slickCurrentSlide");
-
-  //   var actives = $(slick.$slides.get(currentSlide)).index();
-  //   // console.log(currentSlide);
-
-  //   if (item_length == index) {
-  //     alert("Slide 2");
-  //   }
-  // });
-
-  activeMonth();
-});
-
+//判斷是否滾動到0&last
 function slideActive() {
   var item_length = $(".slides-timeline .slide-box").length - 1;
 
@@ -319,44 +307,37 @@ function slideActive() {
     var THIS = $(this);
     var theOffset = $(this).offset();
     var activeItem = THIS.attr("data-slick-index");
-
     if (THIS.hasClass("slick-active") && item_length == activeItem) {
-      console.count("last");
-
+      // console.count("last");
       $("body,html").animate({
-        scrollTop: theOffset.top + 500,
+        scrollTop: theOffset.top + 300,
       });
       return true;
     }
     if (THIS.hasClass("slick-active") && activeItem == 0) {
-      console.count("回到1");
-
-      $("body,html").animate({
-        scrollTop: theOffset.top - 500,
-        scrollTop: $("#hightlights_talented").offset().top + 200,
-      });
-
       return false;
     }
   });
 }
-// slideActive(true);
 
 //window>500觸發 line:28
+//年度活動橫向滾動
 function timelineScroll() {
+  var timer;
   $(".slides-timeline").on("wheel", function (e) {
-    e.preventDefault();
-    if (e.originalEvent.deltaY < 0) {
-      $(this).slick("slickPrev");
-
-      if (slideActive(true)) {
+    window.clearTimeout(timer);
+    var THIS = $(".slides-timeline");
+    timer = window.setTimeout(function () {
+      e.preventDefault();
+      if (e.originalEvent.deltaY < 0) {
+        THIS.slick("slickPrev");
+        slideActive(true);
+      } else {
+        THIS.slick("slickNext");
+        slideActive(false);
       }
-    } else {
-      $(this).slick("slickNext");
-      if (slideActive(false)) {
-      }
-    }
-    return;
+      return;
+    }, 100);
   });
 }
 
