@@ -25,14 +25,7 @@ $(function () {
           $("html").removeClass("Mobile");
         }
         if (width > 500) {
-          $(".slides-timeline").on("wheel", function (e) {
-            e.preventDefault();
-            if (e.originalEvent.deltaY < 0) {
-              $(this).slick("slickPrev");
-            } else {
-              $(this).slick("slickNext");
-            }
-          });
+          timelineScroll();
         } else {
           // 手機版
           $("html").addClass("Mobile");
@@ -62,7 +55,7 @@ $(function () {
           //   $(".main-nav").toggleClass(ClassNames$4.EXPANDED);
           // });
         }
-      }, 500);
+      }, 100);
     })
     .trigger("resize");
 
@@ -152,7 +145,7 @@ var keyvalueOptions = {
 keyValue.slick(keyvalueOptions);
 var allImg = keyValue.find(".img-box");
 var allValue = keyValue.find(".values");
-console.log(allImg);
+// console.log(allImg);
 
 // allImg.removeClass("aos-init aos-animate");
 // allValue.removeClass("aos-init aos-animate");
@@ -253,56 +246,119 @@ var lightOptions = {
 $(".slides-highlight").slick(lightOptions);
 
 //年度活動
-var timelineOptions = {
-  autoplay: false,
-  speed: 1000,
-  slidesToShow: 6,
-  slidesToScroll: 1,
-  rows: 0,
-  arrows: false,
-  initialSlide: 1,
-  // centerMode: true,
-  infinite: false,
-  adaptiveHeight: true,
-  responsive: [
-    {
-      breakpoint: 1200,
-      settings: {
-        slidesToShow: 4,
-        slidesToScroll: 1,
-        rows: 0,
-      },
-      breakpoint: 992,
-      settings: {
-        slidesToShow: 3,
-        slidesToScroll: 1,
-        rows: 0,
-      },
-      breakpoint: 500,
-      settings: "unslick",
-    },
-  ],
-};
-
-$(".slides-timeline").slick(timelineOptions);
-
 // 年度活動月份判斷
 $(function () {
+  var thisMonth;
   var currentMonth = new Date().getMonth() + 1;
-  // alert(currentMonth);
+  // thisMonth = null;
+  function activeMonth() {
+    $(".timeline-wrap .slide-box .month").each(function () {
+      var THIS = $(this);
+      var Month = THIS.attr("data-num");
+      if (Month == currentMonth) {
+        THIS.addClass("active");
+        thisMonth = THIS.parent().attr("data-slick-index");
+        return thisMonth;
+      }
+      if (Month < currentMonth) {
+        THIS.parent(".slide-box").addClass("disabled");
+      }
+    });
+  }
 
-  $(".timeline-wrap .slide-box .month").each(function () {
+  var timelineOptions = {
+    autoplay: false,
+    speed: 1000,
+    slidesToShow: 6,
+    slidesToScroll: 1,
+    rows: 0,
+    arrows: false,
+    initialSlide: 2,
+    // centerMode: true,
+    infinite: false,
+    adaptiveHeight: true,
+
+    responsive: [
+      {
+        breakpoint: 1600,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 1,
+        },
+        breakpoint: 992,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+        },
+        breakpoint: 500,
+        settings: "unslick",
+      },
+    ],
+  };
+  $(".slides-timeline").slick(timelineOptions);
+
+  // $(".slides-timeline").on("afterChange", function (index, slick, currentSlide) {
+
+  //   // var currentSlide = $(".slides-timeline").slick("slickCurrentSlide");
+
+  //   var actives = $(slick.$slides.get(currentSlide)).index();
+  //   // console.log(currentSlide);
+
+  //   if (item_length == index) {
+  //     alert("Slide 2");
+  //   }
+  // });
+
+  activeMonth();
+});
+
+function slideActive() {
+  var item_length = $(".slides-timeline .slide-box").length - 1;
+
+  $(".slides-timeline .slide-box").each(function () {
     var THIS = $(this);
-    var Month = THIS.attr("data-num");
+    var theOffset = $(this).offset();
+    var activeItem = THIS.attr("data-slick-index");
 
-    if (Month == currentMonth) {
-      THIS.addClass("active");
+    if (THIS.hasClass("slick-active") && item_length == activeItem) {
+      console.count("last");
+
+      $("body,html").animate({
+        scrollTop: theOffset.top + 500,
+      });
+      return true;
     }
-    if (Month < currentMonth) {
-      THIS.parent(".slide-box").addClass("disabled");
+    if (THIS.hasClass("slick-active") && activeItem == 0) {
+      console.count("回到1");
+
+      $("body,html").animate({
+        scrollTop: theOffset.top - 500,
+        scrollTop: $("#hightlights_talented").offset().top + 200,
+      });
+
+      return false;
     }
   });
-});
+}
+// slideActive(true);
+
+//window>500觸發 line:28
+function timelineScroll() {
+  $(".slides-timeline").on("wheel", function (e) {
+    e.preventDefault();
+    if (e.originalEvent.deltaY < 0) {
+      $(this).slick("slickPrev");
+
+      if (slideActive(true)) {
+      }
+    } else {
+      $(this).slick("slickNext");
+      if (slideActive(false)) {
+      }
+    }
+    return;
+  });
+}
 
 //判斷手機行動裝置
 function isMobile() {
